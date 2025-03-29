@@ -1,0 +1,22 @@
+{
+  "name": "glidetrip",
+  "version": "1.0.0",
+  "description": "GlideTrip is a smart tourism travel booking system designed for travelers who want to book seamless trips.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src index.js"
+  },
+  "keywords": [
+    "Node.js",
+    "express.js",
+    "mongoDB"
+  ],
+  "author": "Hemsagar",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "http-status-codes": "^2.3.0",
+    "mongoose": "^8.13.1"
+  }
+}
