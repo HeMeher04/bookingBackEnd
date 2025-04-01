@@ -41,4 +41,15 @@ const getParticularVehicle = async(req,res)=>{
     }
 }
 
-module.exports = { createVehicle,getAllVehicle, getParticularVehicle };
+const deleteVehicle = async(req,res)=>{
+    try{
+        const reg_no = req.params.reg_no;
+        await Vehicle.findOneAndDelete({reg_number:reg_no});
+        res.status(200).json({ message: "Vehicle deleted successfully" });
+    }
+    catch(err){
+        res.status(500).json({ error: "Error in deleting vehicle" });
+    }
+}
+
+module.exports = { createVehicle,getAllVehicle, getParticularVehicle, deleteVehicle};

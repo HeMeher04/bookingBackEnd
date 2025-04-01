@@ -1,3 +1,3 @@
-const {createVehicle ,getAllVehicle , getParticularVehicle} = require("./vehicle-controller");
+const {createVehicle ,getAllVehicle , getParticularVehicle, deleteVehicle} = require("./vehicle-controller");
 
-module.exports = {createVehicle , getAllVehicle, getParticularVehicle};
+module.exports = {createVehicle , getAllVehicle, getParticularVehicle, deleteVehicle};
