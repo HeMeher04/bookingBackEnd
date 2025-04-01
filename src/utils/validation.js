@@ -14,4 +14,17 @@ const validateVehicleData = (req)=>{
     }
 }
 
-module.exports = {validateVehicleData};
+const validateUpdateData = (data) =>{
+    try{
+        const isUpdataable = ["name" ,"photoUrl", "capacity","owner","mobile" ];
+        const isEditAllowed =Object.keys(data).every(field=>{
+               return isUpdataable.includes(field);
+        });
+        return isEditAllowed;
+    }
+    catch(err){
+        throw new Error("Error in updating data");
+    }
+}
+
+module.exports = {validateVehicleData,validateUpdateData};

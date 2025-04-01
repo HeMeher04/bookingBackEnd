@@ -44,12 +44,40 @@ const getParticularVehicle = async(req,res)=>{
 const deleteVehicle = async(req,res)=>{
     try{
         const reg_no = req.params.reg_no;
-        await Vehicle.findOneAndDelete({reg_number:reg_no});
-        res.status(200).json({ message: "Vehicle deleted successfully" });
+        const data = await Vehicle.findOneAndDelete({reg_number:reg_no});
+        if(!data ){
+            res.status(404).json({ message : " No Vehicle of this reg_no available" });
+        }
+        else
+            res.status(200).json({ message: "Vehicle deleted successfully" });
     }
     catch(err){
         res.status(500).json({ error: "Error in deleting vehicle" });
     }
 }
 
-module.exports = { createVehicle,getAllVehicle, getParticularVehicle, deleteVehicle};
+//Need to check all test case
+const updateVehicle = async(req,res)=>{
+    try{
+        const reg_no = req.params.reg_no;
+        const original = await Vehicle.findOne({reg_number : reg_no});
+        if(!original ){
+            return res.status(404).json({ message : " No Vehicle of this reg_no available" });
+        }
+        const data = req.body;
+        if(!validateUpdateData(data)){
+            return res.status(400).json({ message: "Invalid data" });
+        }
+        Object.keys(data).forEach((field)=>{
+            original[field] = data[field];
+        })
+        await original.save();
+        return res.json({message:"Update data sucessfully"});
+        
+    }
+    catch(err){
+        res.status(500).json({ error: "Error in updating vehicle" });
+    }
+}
+
+module.exports = { createVehicle,getAllVehicle, getParticularVehicle, deleteVehicle, updateVehicle};
