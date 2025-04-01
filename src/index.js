@@ -3,6 +3,11 @@ const connectDB = require("./config/index.js");
 const app = express();
 const dotenv = require("dotenv");
 dotenv.config();
+app.use(express.json());
+
+const {vehicleRoute} = require("./routes");
+
+app.use("/",vehicleRoute);
 
 connectDB()
 .then(()=>{
