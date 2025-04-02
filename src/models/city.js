@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
+// const validator = require("validator");
 
 const citySchema = new mongoose.Schema({
-    name:{
+    city:{
         type:String,
         required:true,
         unique:true,

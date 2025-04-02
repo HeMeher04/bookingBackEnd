@@ -1,3 +1,3 @@
-const {validateVehicleData} = require("./validation");
+const {validateVehicleData,validateUpdateData} = require("./validation");
 
-module.exports = {validateVehicleData};
+module.exports = {validateVehicleData,validateUpdateData};

@@ -6,9 +6,10 @@ dotenv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const {vehicleRoute} = require("./routes");
+const {vehicleRoute, cityRoute} = require("./routes");
 
 app.use("/",vehicleRoute);
+app.use("/",cityRoute);
 
 connectDB()
 .then(()=>{

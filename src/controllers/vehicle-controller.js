@@ -1,4 +1,4 @@
-const { validateVehicleData } = require("../utils")
+const { validateVehicleData, validateUpdateData } = require("../utils")
 
 const { Vehicle } = require("../models");
 
@@ -56,28 +56,31 @@ const deleteVehicle = async(req,res)=>{
     }
 }
 
-//Need to check all test case
-const updateVehicle = async(req,res)=>{
-    try{
+const updateVehicle = async (req, res) => {
+    try {
         const reg_no = req.params.reg_no;
-        const original = await Vehicle.findOne({reg_number : reg_no});
-        if(!original ){
-            return res.status(404).json({ message : " No Vehicle of this reg_no available" });
+        const original = await Vehicle.findOne({ reg_number: reg_no });
+
+        if (!original) {
+            return res.status(404).json({ message: "No Vehicle of this reg_no available" });
         }
+
         const data = req.body;
-        if(!validateUpdateData(data)){
+        if (!validateUpdateData(data)) {
             return res.status(400).json({ message: "Invalid data" });
         }
-        Object.keys(data).forEach((field)=>{
+
+        Object.keys(data).forEach(field => {
             original[field] = data[field];
-        })
+        });
+
         await original.save();
-        return res.json({message:"Update data sucessfully"});
-        
-    }
-    catch(err){
+        res.json({ message: "Update data successfully" });
+
+    } catch (err) {
         res.status(500).json({ error: "Error in updating vehicle" });
     }
-}
+};
+
 
 module.exports = { createVehicle,getAllVehicle, getParticularVehicle, deleteVehicle, updateVehicle};

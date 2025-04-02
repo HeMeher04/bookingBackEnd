@@ -16,9 +16,22 @@ const validateVehicleData = (req)=>{
 
 const validateUpdateData = (data) =>{
     try{
-        const isUpdataable = ["name" ,"photoUrl", "capacity","owner","mobile" ];
-        const isEditAllowed =Object.keys(data).every(field=>{
-               return isUpdataable.includes(field);
+        const isUpdatable = ["name" ,"photoUrl", "capacity","owner","mobile" ];
+        
+        const isEditAllowed = Object.keys(data).every(field => {
+            if (!isUpdatable.includes(field)) return false; // Invalid field
+            
+            if (field === "photoUrl" && !validator.isURL(data[field])) {
+                return false;
+            }
+            if (field === "capacity" && isNaN(Number(data[field]))) {
+                return false;
+            }
+            if (field === "mobile" && !validator.isMobilePhone(data[field])) {
+                return false;
+            }
+
+            return true;
         });
         return isEditAllowed;
     }
@@ -26,5 +39,6 @@ const validateUpdateData = (data) =>{
         throw new Error("Error in updating data");
     }
 }
+
 
 module.exports = {validateVehicleData,validateUpdateData};
