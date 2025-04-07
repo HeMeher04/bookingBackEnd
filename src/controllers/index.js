@@ -3,5 +3,8 @@ const {createVehicle ,getAllVehicle , getParticularVehicle, deleteVehicle,update
 
 const {createCity ,getAllCity , deleteCity, updateCity} = require("./city-controller");
 
-module.exports = {createVehicle , getAllVehicle, getParticularVehicle, deleteVehicle,updateVehicle,createCity ,getAllCity , deleteCity, updateCity
+const {createStation, updateStation, getStations, getStationsByCity, deleteStation} = require("./stations-controller");
+
+module.exports = {createVehicle , getAllVehicle, getParticularVehicle, deleteVehicle,updateVehicle,createCity ,getAllCity , deleteCity, updateCity,
+    createStation,updateStation, getStations,getStationsByCity,deleteStation
 };
