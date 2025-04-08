@@ -1,51 +1,41 @@
 const mongoose = require("mongoose");
 
 const tripSchema = new mongoose.Schema({
-    reg_number :{
-        type:String,
-        required: true,
-        uppercase: true,
-        trim: true,
+    vehicle: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Vehicle",
+        required: true
     },
-    boardingStation:{
-        type:String,
-        required: true,
-        trim:true,
+    fromStation: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Stations",
+        required: true
     },
-    arrivialStation:{
-        type:String,
-        required: true,
-        trim:true,
+    toStation: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Stations",
+        required: true
     },
-    boardingCity:{
-        type:String,
-        required: true,
-        trim:true,
-
+    departureTime: {
+        type: Date,
+        required: true
     },
-    arrivialCity:{
-        type:String,
-        required: true,
-        trim:true,
+    arrivalTime: {
+        type: Date,
+        required: true
     },
-    FormData:{
-        type:Date,
+    price: {
+        type: Number,
         required: true,
+        min: 0
     },
-    ToDate:{
-        type:Date,
+    availableSeats: {
+        type: Number,
         required: true,
-    },
-    seatleft:{
-        type:Number,
-        required: true,
-        min:0,
-    },
-    price:{
-        type:Number,
-        required: true,
-        min:0,
+        min: 0
     }
-},{timestamps:true});
+}, { timestamps: true });
 
-module.exports= new mongoose.model("Trip",tripSchema);
+module.exports = mongoose.model("Trip", tripSchema);
+
+

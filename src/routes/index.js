@@ -1,7 +1,7 @@
-const vehicleRoute = require("./vehicles");
-const cityRoute = require("./city");
-const stationsRoute = require("./stations");
-const tripRoute = require("./trip");
+const vehicleRoute = require("./vehicles-route");
+const cityRoute = require("./city-routes");
+const stationsRoute = require("./stations-route");
+const tripRoute = require("./trip-route");
 
 
 module.exports = {vehicleRoute, cityRoute, stationsRoute, tripRoute};
