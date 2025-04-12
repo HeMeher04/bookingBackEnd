@@ -5,6 +5,9 @@ const {createCity ,getAllCity , deleteCity, updateCity} = require("./city-contro
 
 const {createStation, updateStation, getStations, getStationsByCity, deleteStation} = require("./stations-controller");
 
+const {createTrip} = require("./trip-controller");
+
 module.exports = {createVehicle , getAllVehicle, getParticularVehicle, deleteVehicle,updateVehicle,createCity ,getAllCity , deleteCity, updateCity,
-    createStation,updateStation, getStations,getStationsByCity,deleteStation
+    createStation,updateStation, getStations,getStationsByCity,deleteStation,
+    createTrip,
 };

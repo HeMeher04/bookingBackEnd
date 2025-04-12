@@ -33,10 +33,9 @@ const deleteCity = async(req,res)=>{
         const city = req.params.city;
         const data = await City.findOneAndDelete({city});
         if(!data ){
-            res.status(404).json({ message : " No City of this name available" });
+            return res.status(404).json({ message : " No City of this name available" });
         }
-        else
-            res.status(200).json({ message: "City deleted successfully" });
+        res.status(200).json({ message: "City deleted successfully" });
     }
     catch(err){
         res.status(500).json({ error: "Error in deleting city" });

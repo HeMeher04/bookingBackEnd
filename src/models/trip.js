@@ -16,11 +16,11 @@ const tripSchema = new mongoose.Schema({
         ref: "Stations",
         required: true
     },
-    departureTime: {
+    departureDateAndTime: {
         type: Date,
         required: true
     },
-    arrivalTime: {
+    arrivalDateAndTime: {
         type: Date,
         required: true
     },

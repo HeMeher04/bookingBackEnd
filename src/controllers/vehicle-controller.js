@@ -1,4 +1,4 @@
-const { validateVehicleData, validateUpdateData } = require("../utils")
+const { validateVehicleData, validateUpdateData } = require("../middlewares");
 
 const { Vehicle } = require("../models");
 

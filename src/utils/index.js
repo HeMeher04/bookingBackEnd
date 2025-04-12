@@ -1,6 +1,5 @@
-const {validateVehicleData,validateUpdateData} = require("./validation");
-const {stationData, updateStationData} = require("./stationsValidation");
+const {parseDateTime12Hr}= require("./tripValidation");
 
-module.exports = {validateVehicleData,validateUpdateData,
-    stationData, updateStationData
+module.exports = {
+    parseDateTime12Hr,
 };

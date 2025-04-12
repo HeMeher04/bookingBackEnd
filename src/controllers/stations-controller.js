@@ -1,6 +1,5 @@
 const {Stations ,City} = require("../models");
-const stations = require("../models/stations");
-const {stationData,updateStationData} = require("../utils");
+const {stationData,updateStationData} = require("../middlewares");
  
 const createStation = async(req,res)=>{
     try{
