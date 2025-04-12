@@ -11,10 +11,18 @@ const tripSchema = new mongoose.Schema({
         ref: "Stations",
         required: true
     },
+    fromCityId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "City",
+    },
     toStation: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Stations",
         required: true
+    },
+    toCityId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "City",
     },
     departureDateAndTime: {
         type: Date,

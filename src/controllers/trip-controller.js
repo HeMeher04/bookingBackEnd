@@ -1,6 +1,18 @@
-const { Vehicle, Stations, Trip } = require("../models");
+const { Vehicle, Stations, Trip, City } = require("../models");
 const { parseDateTime12Hr } = require("../utils");
-
+/*
+{
+  "vehicleReg": "KA01AB1234",
+  "fromStationName": "Satya Sai Hospital",
+  "toStationName": "Ooty",
+  "departureDate": "08-04-25",
+  "departureTime": "11:24 PM",
+  "arrivalDate": "10-04-25",
+  "arrivalTime": "05:45 AM",
+  "price": 3000,
+  "availableSeats": 25
+}
+  */
 const createTrip = async (req, res) => {
     try {
         const {
@@ -13,11 +25,17 @@ const createTrip = async (req, res) => {
         const vehicle = await Vehicle.findOne({ reg_number: vehicleReg });
         if (!vehicle) throw new Error("Vehicle not found");
 
+        if (availableSeats > vehicle.capacity) {
+            return res.status(400).json({ error: "Available seats cannot exceed vehicle seat capacity" });
+        }
+
         const fromStation = await Stations.findOne({ stations: fromStationName });
         if (!fromStation) throw new Error("From Station not found");
+        const fromCityId = fromStation.city;
 
         const toStation = await Stations.findOne({ stations: toStationName });
         if (!toStation) throw new Error("To Station not found");
+        const toCityId = toStation.city;
 
         const departureDateTime = parseDateTime12Hr(departureDate, departureTime);
         const arrivalDateTime = parseDateTime12Hr(arrivalDate, arrivalTime);
@@ -32,6 +50,8 @@ const createTrip = async (req, res) => {
             departureDateAndTime: departureDateTime,
             arrivalDateAndTime: arrivalDateTime,
             price,
+            fromCityId,
+            toCityId,
             availableSeats
         });
 
@@ -41,4 +61,83 @@ const createTrip = async (req, res) => {
     }
 };
 
-module.exports = { createTrip };
+/* 
+http://localhost:3000/trip/getAll?trips=Bengaluru-Ooty&price=300-3000&departureDate=2025-04-08
+*/
+const getAllTripWithFilter = async (req, res) => {
+    try {
+        const query = req.query;
+        const customFilter = {};
+        const sortFilter={};
+        if(query.trips){
+            [fromCity, toCity] = query.trips.split("-");
+            fromCityId = await City.findOne({ city: fromCity });
+            toCityId = await City.findOne({ city: toCity });
+            if(fromCityId && toCityId) {
+                customFilter.fromCityId = fromCityId._id;
+                customFilter.toCityId = toCityId._id;
+            }
+            else if(fromCityId) {
+                customFilter.fromCityId = fromCityId._id;
+            }
+            else if(toCityId) {
+                customFilter.toCityId = toCityId._id;
+            }
+        }
+
+        if (query.price) {
+            const [minPrice, maxPrice] = query.price.split("-").map(Number);
+            if (Number.isFinite(minPrice) && Number.isFinite(maxPrice)) {
+                customFilter.price = { $gte: minPrice, $lte: maxPrice };
+            } else if (Number.isFinite(minPrice)) {
+                customFilter.price = { $gte: minPrice };
+            } else if (Number.isFinite(maxPrice)) {
+                customFilter.price = { $lte: maxPrice };
+            }
+        }
+        //YYYY-MM-DD format
+        if (query.departureDate) {
+            const departureDate = new Date(query.departureDate);
+            
+            if (!isNaN(departureDate.getTime())) {
+                const startOfDay = new Date(departureDate);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(departureDate);
+                endOfDay.setHours(23, 59, 59, 999);
+
+                customFilter.departureDateAndTime = {
+                    $gte: startOfDay,
+                    $lte: endOfDay
+                };
+            }
+        }
+
+        if (query.seat) {
+            const availableSeats = Number(query.seat);
+            if (!isNaN(availableSeats)) {
+                customFilter.availableSeats = { $gte: availableSeats }; 
+            } 
+        }
+
+        if (query.sort) {
+            const params = query.sort.split(',');
+            params.forEach((param) => {
+                const parts = param.split('_');
+                const field = parts[0]
+                if (field) {  
+                    const order = (parts[1] || 'asc').toLowerCase();  
+                    sortFilter[field] = order === 'desc' ? -1 : 1;
+                }
+            });
+        }
+        
+        const trips = await Trip.find(customFilter).sort(sortFilter);
+
+        res.status(200).json({ data: trips });
+    }
+    catch (err) {
+        res.status(400).json({ error: `Error in getting all trips: ${err.message}` });
+    }
+}
+
+module.exports = { createTrip, getAllTripWithFilter };
