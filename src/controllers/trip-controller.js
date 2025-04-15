@@ -62,7 +62,7 @@ const createTrip = async (req, res) => {
 };
 
 /* 
-http://localhost:3000/trip/getAll?trips=Bengaluru-Ooty&price=300-3000&departureDate=2025-04-08
+http://localhost:3000/trip/getAllWithFilter?trips=Bengaluru-Ooty&price=300-3000&departureDate=2025-04-08&sort=price_desc,availableSeats_asc
 */
 const getAllTripWithFilter = async (req, res) => {
     try {
@@ -131,9 +131,22 @@ const getAllTripWithFilter = async (req, res) => {
             });
         }
         
-        const trips = await Trip.find(customFilter).sort(sortFilter);
+        const trips = await Trip.find(customFilter).populate("vehicle fromStation toStation").sort(sortFilter);
+        const dataToShow = trips.map(trip => {
+            return {
+                vehicleReg: trip.vehicle.reg_number,
+                fromCity: trip.fromCityId.city,
+                fromStation: trip.fromStation.stations,
+                toCity: trip.toCityId.city,
+                toStation: trip.toStation.stations,
+                departureDateAndTime: trip.departureDateAndTime,
+                arrivalDateAndTime: trip.arrivalDateAndTime,
+                price: trip.price,
+                availableSeats: trip.availableSeats
+            };
+        });
 
-        res.status(200).json({ data: trips });
+        res.status(200).json({ data: dataToShow });
     }
     catch (err) {
         res.status(400).json({ error: `Error in getting all trips: ${err.message}` });
