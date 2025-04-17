@@ -29,7 +29,7 @@ const vehicleSchema = new mongoose.Schema({
         maxlength:20,
         validate(value){
             if(!["traveller","bus"].includes(value)){
-                throw new Error("Invalid gender");
+                throw new Error("Invalid type");
             }
         }
     },

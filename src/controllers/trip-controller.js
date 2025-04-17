@@ -9,8 +9,7 @@ const { parseDateTime12Hr } = require("../utils");
   "departureTime": "11:24 PM",
   "arrivalDate": "10-04-25",
   "arrivalTime": "05:45 AM",
-  "price": 3000,
-  "availableSeats": 25
+  "price": 3000
 }
   */
 const createTrip = async (req, res) => {
@@ -19,15 +18,13 @@ const createTrip = async (req, res) => {
             vehicleReg, fromStationName, toStationName,
             departureDate, departureTime,
             arrivalDate, arrivalTime,
-            price, availableSeats
+            price
         } = req.body;
 
         const vehicle = await Vehicle.findOne({ reg_number: vehicleReg });
         if (!vehicle) throw new Error("Vehicle not found");
 
-        if (availableSeats > vehicle.capacity) {
-            return res.status(400).json({ error: "Available seats cannot exceed vehicle seat capacity" });
-        }
+        const availableSeats = vehicle.capacity;
 
         const fromStation = await Stations.findOne({ stations: fromStationName });
         if (!fromStation) throw new Error("From Station not found");
@@ -153,4 +150,68 @@ const getAllTripWithFilter = async (req, res) => {
     }
 }
 
-module.exports = { createTrip, getAllTripWithFilter };
+
+/*
+http://localhost:3000/trip/get/67fa52aded134877db80b229
+ */
+const getTrip = async (req, res) => {
+    try {
+        const tripId = req.params.tripId;
+        const trip = await Trip.findById(tripId).populate("vehicle fromStation toStation fromCityId toCityId");
+        if (!trip) {
+            return res.status(404).json({ error: "Trip not found" });
+        }
+        const dataToShow = {
+            vehicleReg: trip.vehicle.reg_number,
+            vehicleType: trip.vehicle.type,
+            fromCity: trip.fromCityId.city,
+            fromStation: trip.fromStation.stations,
+            toCity: trip.toCityId.city,
+            toStation: trip.toStation.stations,
+            departureDateAndTime: trip.departureDateAndTime,
+            arrivalDateAndTime: trip.arrivalDateAndTime,
+            price: trip.price,
+            availableSeats: trip.availableSeats
+        };
+        res.status(200).json({ data: dataToShow });
+    }
+    catch(err) {
+        res.status(400).json({ error: `Error in getting trip: ${err.message}` });
+    }
+}
+
+
+/*
+http://localhost:3000/trip/seats/680108f71cf6282f5b47c405
+{
+    "seats":2
+    // "decrease":0
+}
+*/
+const updateSeats = async(req,res)=>{
+    try{
+        const tripId = req.params.tripId;
+        const { seats, decrease } = req.body;
+        const trip = await Trip.findById(tripId);
+        if (!trip) {
+            return res.status(404).json({ error: "Trip not found" });
+        }
+        if(!decrease) {
+            if (trip.availableSeats < seats) {
+                return res.status(400).json({ error: "Not enough available seats" });
+            }
+            trip.availableSeats -= seats;
+            
+        }
+        else{
+            trip.availableSeats += seats;
+        }
+        await trip.save();
+        res.status(200).json({ message: "Seats updated successfully", data: trip });
+    }
+    catch{
+        res.status(400).json({ error: `Error in updating seats: ${err.message}` });
+    }
+}
+
+module.exports = { createTrip, getAllTripWithFilter, getTrip ,updateSeats};

@@ -5,10 +5,10 @@ const {createCity ,getAllCity , deleteCity, updateCity} = require("./city-contro
 
 const {createStation, updateStation, getStations, getStationsByCity, deleteStation} = require("./stations-controller");
 
-const {createTrip, getAllTripWithFilter} = require("./trip-controller");
+const {createTrip, getAllTripWithFilter,getTrip, updateSeats} = require("./trip-controller");
 
 module.exports = {createVehicle , getAllVehicle, getParticularVehicle, deleteVehicle,updateVehicle,createCity ,getAllCity , deleteCity, updateCity,
     createStation,updateStation, getStations,getStationsByCity,deleteStation,
-    createTrip,getAllTripWithFilter
+    createTrip,getAllTripWithFilter,getTrip,updateSeats
 
 };

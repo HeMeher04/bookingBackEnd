@@ -5,13 +5,13 @@ const validateCreateTrip = (req, res, next) => {
         vehicleReg, fromStationName, toStationName,
         departureDate, departureTime,
         arrivalDate, arrivalTime,
-        price, availableSeats
+        price
     } = req.body;
 
     if (!vehicleReg || !fromStationName || !toStationName ||
         !departureDate || !departureTime ||
         !arrivalDate || !arrivalTime ||
-        price === undefined || availableSeats === undefined
+        price === undefined
     ) {
         return res.status(400).json({ error: "All fields are required" });
     }
@@ -36,11 +36,15 @@ const validateCreateTrip = (req, res, next) => {
         return res.status(400).json({ error: "Invalid price" });
     }
 
-    if (!validator.isInt(availableSeats.toString(), { min: 0 })) {
-        return res.status(400).json({ error: "Available seats must be a non-negative integer" });
-    }
-
     next();
 };
 
-module.exports = { validateCreateTrip };
+const validateUpdateSeats = (req, res, next) => {
+    const { seats } = req.body;
+    if (!seats || !validator.isNumeric(seats.toString()) || seats < 0){
+        return res.status(400).json({ error: "Invalid number of seats" });
+    }
+    next();
+}
+
+module.exports = { validateCreateTrip, validateUpdateSeats };
