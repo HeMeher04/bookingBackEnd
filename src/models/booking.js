@@ -11,11 +11,6 @@ const bookingSchema = new mongoose.Schema({
     ref: "User",
     required: true
   },
-//   bookedSeats: [{
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Seat",
-//     required: true
-//   }],
   noOfSeats: {
     type: Number,
     default: 1,

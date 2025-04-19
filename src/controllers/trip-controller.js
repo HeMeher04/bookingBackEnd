@@ -185,7 +185,8 @@ const getTrip = async (req, res) => {
 http://localhost:3000/trip/seats/680108f71cf6282f5b47c405
 {
     "seats":2
-    // "decrease":0
+    // "decrease":1 -- for increasing seats
+    // "decrease":0 -- for decreasing seats
 }
 */
 const updateSeats = async(req,res)=>{
