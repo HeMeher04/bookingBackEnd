@@ -1,22 +1,22 @@
 const { Trip } = require("../models");
 const mongoose = require("mongoose");
-const { createBookingRepo , updateBookingStatus} = require("../utils");
-const BOOKED = "booked";
+const { createBookingRepo, updateBookingStatus, abortAndReturn } = require("../utils");
 const Booking = require("../models/booking");
 
-const createBooking = async (req, res) => {
-    const { tripId, userId, seatCount } = req.body;
+const BOOKED = "booked";
+const CANCELLED = "cancelled";
 
+const createBooking = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
+        const { tripId, userId, seatCount } = req.body;
+
         const trip = await Trip.findById(tripId).session(session);
-        if (!trip) {
-            return res.status(404).json({ error: "Trip not found" });
-        }
+        if (!trip) return abortAndReturn(session, res, 404, { error: "Trip not found" });
 
         if (trip.availableSeats < seatCount) {
-            return res.status(400).json({ error: "Not enough seats available" });
+            return abortAndReturn(session, res, 400, { error: "Not enough seats available" });
         }
 
         const totalCost = trip.price * seatCount;
@@ -26,59 +26,79 @@ const createBooking = async (req, res) => {
             noOfSeats: seatCount,
             totalCost: totalCost
         };
-        
+
         const booking = await createBookingRepo(bookingPayload, session);
         trip.availableSeats -= seatCount;
-        //trip.availableSeats="ki";   // check rollback
         await trip.save({ session });
+
         await session.commitTransaction();
-        session.endSession();
-        return res.status(200).json({ message: "Booking created successfully" ,data: booking});
+        return res.status(200).json({ message: "Booking created successfully", data: booking });
 
     } catch (err) {
         await session.abortTransaction();
-        session.endSession();
         return res.status(500).json({ error: "Server error while creating booking", details: err.message });
+    } finally {
+        session.endSession();
     }
 };
 
 const makePayment = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
-    try{
-        const {bookingId, userId, totalCost} = req.body;
-        const booking = await Booking.findById(bookingId).session(session);
-        if(!booking){
-            return res.status(404).json({ error: "BookingId not found" });
-        }
+    try {
+        const { bookingId, userId, totalCost } = req.body;
 
-        if(booking.status == 'cancelled'){
-            return res.status(400).json({ error: "Booking expired" });
+        const booking = await Booking.findById(bookingId).session(session);
+        if (!booking) return abortAndReturn(session, res, 404, { error: "Booking not found" });
+
+        if (booking.status === CANCELLED) {
+            return abortAndReturn(session, res, 400, { error: "Booking already cancelled" });
+        }
+        if (booking.status === BOOKED) {
+            return abortAndReturn(session, res, 400, { error: "Already paid" });
         }
 
         const bookingTime = new Date(booking.createdAt);
         const currentTime = new Date();
-        if((currentTime - bookingTime) > 5 * 60 * 1000){
-            return res.status(400).json({ error: "Booking expired" });
+
+        if ((currentTime - bookingTime) > 5* 60 * 1000) { 
+            await cancelBookingRepo(bookingId, session);
+            await session.commitTransaction(); 
+            return res.status(400).json({ error: "Booking expired and cancelled" });
         }
 
-        if(totalCost !== booking.totalCost){
-            return res.status(400).json({ error: "Total cost mismatch" });
+        if (totalCost !== booking.totalCost) {
+            return abortAndReturn(session, res, 400, { error: "Total cost mismatch" });
         }
-        if(userId !== booking.user.toString()){
-            return res.status(403).json({ error: "User mismatch" });
-        }
-        // Here you would integrate with a payment gateway to process the payment and assume payment is successful
 
-        const finalBooking = await updateBookingStatus(bookingId, {status: BOOKED}, session);
-        session.commitTransaction();
-        session.endSession();
+        if (userId !== booking.user.toString()) {
+            return abortAndReturn(session, res, 400, { error: "User ID mismatch" });
+        }
+
+        const finalBooking = await updateBookingStatus(bookingId, { status: BOOKED }, session);
+        await session.commitTransaction();
         return res.status(200).json({ message: "Payment successful", data: finalBooking });
-    }
-    catch(err){
+
+    } catch (err) {
         await session.abortTransaction();
-        session.endSession();
         return res.status(500).json({ error: "Server error while making payment", details: err.message });
+    } finally {
+        session.endSession();
     }
-}
+};
+
+const cancelBookingRepo = async (bookingId, session) => {
+    
+    const booking = await Booking.findById(bookingId).session(session);
+    if (booking.status !== CANCELLED) {
+        const trip = await Trip.findById(booking.trip).session(session);
+        if (!trip) throw new Error("Trip not found while cancelling booking");
+
+        trip.availableSeats += booking.noOfSeats;
+        await trip.save({ session });
+
+        await updateBookingStatus(bookingId, { status: CANCELLED }, session);
+    }
+};
+
 module.exports = { createBooking, makePayment };

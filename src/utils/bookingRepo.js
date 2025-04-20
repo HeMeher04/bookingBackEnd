@@ -39,6 +39,13 @@ async function updateBookingStatus(id, data, session = null) {
     });
 }
 
+const abortAndReturn = async (session, res, code, message) => {
+    await session.abortTransaction();
+    session.endSession();
+    return res.status(code).json(message);
+};
 
 
-module.exports = { createBookingRepo, updateBookingStatus };
+
+
+module.exports = { createBookingRepo, updateBookingStatus, abortAndReturn };

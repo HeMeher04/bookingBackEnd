@@ -20,7 +20,6 @@ const getAllCity = async(req,res)=>{
     try{
         const city = await City.find(); 
         res.json({ message: "All city fetched successfully", city });
-
     }
     catch{
         res.status(500).json({ error: "Error in getting all city" });
