@@ -7,11 +7,10 @@ const {createStation, updateStation, getStations, getStationsByCity, deleteStati
 
 const {createTrip, getAllTripWithFilter,getTrip, updateSeats} = require("./trip-controller");
 
-const {createBooking} = require("./booking-controller");
+const {createBooking, makePayment} = require("./booking-controller");
 
 module.exports = {createVehicle , getAllVehicle, getParticularVehicle, deleteVehicle,updateVehicle,createCity ,getAllCity , deleteCity, updateCity,
     createStation,updateStation, getStations,getStationsByCity,deleteStation,
     createTrip,getAllTripWithFilter,getTrip,updateSeats,
-    createBooking
-
+    createBooking, makePayment
 };
